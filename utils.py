@@ -104,29 +104,23 @@ async def post_job(context: ContextTypes.DEFAULT_TYPE, force_one=False):
                     parse_mode=parse_mode
                 )
                 
-                # --- منطق الملصق التفاعلي للبوت (الحل الجديد) ---
-                # نحن نفتح جلسة جديدة للتعامل مع الملصق لضمان الحساب الصحيح
+                # --- منطق الملصق التفاعلي للبوت (رسالة مستقلة) ---
                 sticker_session = db.Session()
                 try:
                     db_channel = sticker_session.query(db.Channel).filter_by(id=channel.id).first()
                     
-                    # التأكد من تفعيل خاصية الملصق
                     if db_channel.sticker_interval and db_channel.sticker_file_id:
-                        # زيادة العداد لأننا نشرنا رسالة (حتى لو كانت من البوت)
                         db_channel.msg_counter += 1
                         sticker_session.commit()
                         
-                        # التحقق هل حان وقت النشر؟
                         if db_channel.msg_counter >= db_channel.sticker_interval:
                             try:
-                                # إرسال الملصق كرد على الرسالة المنشورة للتو
+                                # إرسال الملصق بشكل مستقل (بدون رد)
                                 await context.bot.send_sticker(
                                     chat_id=channel.channel_id,
-                                    sticker=db_channel.sticker_file_id,
-                                    reply_to_message_id=sent_message.message_id
+                                    sticker=db_channel.sticker_file_id
                                 )
                                 
-                                # تصفير العداد (رسالة الملصق نفسها لا تدخل في الحساب لأننا صفرنا بعدها)
                                 db_channel.msg_counter = 0
                                 sticker_session.commit()
                                 logger.info(f"Sticker sent via post_job to {db_channel.title}")
