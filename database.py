@@ -84,13 +84,57 @@ def remove_channel_db(ch_id):
         session.close()
 
 def add_file_content(category, content_list):
-    session = Session()
+    session = db.Session()
     count = 0
     try:
-        for text in content_list:
-            new_content = FileContent(category=category, content=text)
-            session.add(new_content)
-            count += 1
+        # قائمة الأقسام التي تعتبر شعراً
+        poetry_categories = ['ابيات شعرية', 'غزل', 'قصائد']
+
+        if category in poetry_categories:
+            # المتغير الذي سيجمع أسطر القصيدة الحالية
+            current_poem_lines = []
+            
+            for line in content_list:
+                text = line.strip()
+                
+                # 1. إذا وجدنا علامة الفاصل، فهذا يعني انتهاء القصيدة الحالية
+                if '-----' in text:
+                    if current_poem_lines:
+                        # دمج الأسطر ونصعها في قاعدة البيانات كوحدة واحدة
+                        poem_text = "\n".join(current_poem_lines)
+                        new_content = FileContent(category=category, content=poem_text)
+                        session.add(new_content)
+                        count += 1
+                        # تصفير القائمة للقصيدة التالية
+                        current_poem_lines = []
+                    continue # تخطي سطر الفاصل
+
+                # 2. تجاهل أسطر أسماء الشعراء
+                if text.startswith('الشاعر:'):
+                    continue
+
+                # 3. تجاهل الأسطر الفارغة تماماً
+                if not text:
+                    continue
+
+                # 4. إضافة السطر إلى القصيدة الحالية
+                current_poem_lines.append(text)
+            
+            # (في حال انتهى الملف ولم تكن هناك علامة فاصل في آخره، نقوم بحفظ ما تبقى)
+            if current_poem_lines:
+                poem_text = "\n".join(current_poem_lines)
+                new_content = FileContent(category=category, content=poem_text)
+                session.add(new_content)
+                count += 1
+
+        else:
+            # منطق الأقسام العادية (الحب، أقتباسات): كل سطر على حدة
+            for text in content_list:
+                if not text.strip(): continue
+                new_content = FileContent(category=category, content=text.strip())
+                session.add(new_content)
+                count += 1
+                
         session.commit()
     except Exception as e:
         print(f"Error adding content: {e}")
