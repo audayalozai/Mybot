@@ -39,7 +39,7 @@ def get_user_keyboard():
     keyboard = [
         [InlineKeyboardButton("➕ إضافة قناة/مجموعة", callback_data="add_channel_prompt")],
         [InlineKeyboardButton("🔧 إدارة القنوات", callback_data="manage_channels")],
-        [InlineKeyboardButton("📊 الإحصائيات", callback_data="show_stats")]
+        [InlineKeyboardButton(" 📊 الإحصائيات", callback_data="show_stats")]
     ]
     return InlineKeyboardMarkup(keyboard)
 
