@@ -5,7 +5,7 @@ from datetime import datetime
 import random
 
 # إعداد قاعدة البيانات
-engine = create_engine('sqlite:///bot_database.db', echo=False)
+engine = create_engine('sqlite:////app/data/bot_database.db', echo=False)
 Base = declarative_base()
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
