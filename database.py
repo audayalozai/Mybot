@@ -1,11 +1,29 @@
+import os
+import sys
+
+# --- حل مشكلة عدم وجود المجلد في Railway ---
+# تحديد المسار المخصص للبيانات
+DATA_DIR = '/app/data'
+
+# التأكد من وجود المجلد، وإذا لم يكن موجوداً يتم إنشاؤه
+# os.makedirs(path, exist_ok=True) تقوم بإنشاء المجلد إذا لم يكن موجوداً
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
+    print(f"Created directory: {DATA_DIR}")
+
+# تعديل المسار ليكون داخل المجلد
+DB_PATH = os.path.join(DATA_DIR, 'bot_database.db')
+print(f"Database Path: {DB_PATH}")
+# ---------------------------------------------------
+
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from datetime import datetime
 import random
 
-# إعداد قاعدة البيانات
-engine = create_engine('sqlite:////app/data/bot_database.db', echo=False)
+# إعداد قاعدة البيانات باستخدام المسار المحدد
+engine = create_engine(f'sqlite:///{DB_PATH}', echo=False)
 Base = declarative_base()
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
